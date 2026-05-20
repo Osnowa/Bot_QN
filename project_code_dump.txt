@@ -1,0 +1,725 @@
+================================================================================
+ПРОЕКТ CODE DUMP
+Путь к проекту: /Users/ilasavin/VSCProjects/Bot_QN
+================================================================================
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/project_code_dump.txt
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: project_code_dump.txt
+================================================================================
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: project_code_dump.txt
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/requirements.txt
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: requirements.txt
+================================================================================
+aiofiles==25.1.0
+aiogram==3.28.2
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.5
+aiosignal==1.4.0
+annotated-types==0.7.0
+asyncpg==0.31.0
+attrs==26.1.0
+certifi==2026.4.22
+environs==15.0.1
+frozenlist==1.8.0
+idna==3.15
+logging==0.4.9.6
+magic-filter==1.0.12
+marshmallow==4.3.0
+multidict==6.7.1
+propcache==0.5.2
+psycopg==3.3.4
+pydantic==2.13.4
+pydantic_core==2.46.4
+python-dotenv==1.2.2
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+yarl==1.23.0
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: requirements.txt
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/collect_cod.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: collect_cod.py
+================================================================================
+import os
+import sys
+from pathlib import Path
+
+def collect_project_code(output_file="project_code_dump.txt", 
+                         extensions=None, 
+                         ignore_dirs=None,
+                         ignore_files=None):
+    """
+    Собирает весь код проекта в один текстовый файл.
+    
+    Args:
+        output_file: имя выходного файла
+        extensions: список расширений файлов для включения (по умолчанию основные форматы кода)
+        ignore_dirs: список директорий для игнорирования
+        ignore_files: список файлов для игнорирования
+    """
+    
+    # Расширения файлов для включения
+    if extensions is None:
+        extensions = [
+            '.py', '.js', '.ts', '.jsx', '.tsx', '.html', '.css', '.scss', '.sass',
+            '.java', '.cpp', '.c', '.h', '.hpp', '.cs', '.go', '.rs', '.php',
+            '.rb', '.swift', '.kt', '.sql', '.sh', '.bash', '.zsh', '.ps1',
+            '.json', '.xml', '.yaml', '.yml', '.toml', '.ini', '.cfg',
+            '.md', '.txt', '.rst', '.tex', '.vue', '.svelte'
+        ]
+    
+    # Директории для игнорирования
+    if ignore_dirs is None:
+        ignore_dirs = {
+            '__pycache__', '.git', 'node_modules', 'venv', 'env', 
+            '.venv', '.env', 'dist', 'build', '.idea', '.vscode',
+            'coverage', '.pytest_cache', 'migrations', 'logs', 'temp',
+            'tmp', '.cache', '__pycache__', '.mypy_cache', '.tox',
+            '.eggs', '*.egg-info', '.gradle', '.next', 'out', 'target'
+        }
+    
+    # Файлы для игнорирования
+    if ignore_files is None:
+        ignore_files = {
+            output_file, '.DS_Store', 'Thumbs.db', '*.log', '*.lock',
+            'package-lock.json', 'yarn.lock', 'poetry.lock', '*.pyc',
+            '*.pyo', '*.pyd', '*.so', '*.dll', '*.exe', '*.class'
+        }
+    
+    project_root = os.getcwd()
+    file_count = 0
+    
+    with open(output_file, 'w', encoding='utf-8') as outfile:
+        outfile.write("=" * 80 + "\n")
+        outfile.write("ПРОЕКТ CODE DUMP\n")
+        outfile.write(f"Путь к проекту: {project_root}\n")
+        outfile.write("=" * 80 + "\n\n")
+        
+        # Обход всех файлов в проекте
+        for root, dirs, files in os.walk(project_root):
+            # Фильтрация директорий для игнорирования
+            dirs[:] = [d for d in dirs if d not in ignore_dirs]
+            
+            for file in files:
+                # Проверка на игнорируемые файлы
+                if file in ignore_dirs:
+                    continue
+                
+                # Проверка расширения
+                file_ext = os.path.splitext(file)[1].lower()
+                if file_ext not in extensions:
+                    continue
+                
+                full_path = os.path.join(root, file)
+                relative_path = os.path.relpath(full_path, project_root)
+                
+                try:
+                    # Читаем содержимое файла
+                    with open(full_path, 'r', encoding='utf-8') as infile:
+                        content = infile.read()
+                    
+                    # Записываем в выходной файл
+                    outfile.write("=" * 80 + "\n")
+                    outfile.write(f"ФАЙЛ: {full_path}\n")
+                    outfile.write(f"ОТНОСИТЕЛЬНЫЙ ПУТЬ: {relative_path}\n")
+                    outfile.write("=" * 80 + "\n")
+                    outfile.write(content)
+                    outfile.write("\n\n" + "=" * 80 + "\n")
+                    outfile.write(f"КОНЕЦ ФАЙЛА: {relative_path}\n")
+                    outfile.write("=" * 80 + "\n\n\n")
+                    
+                    file_count += 1
+                    print(f"Обработан: {relative_path}")
+                    
+                except UnicodeDecodeError:
+                    print(f"Пропущен (бинарный файл): {relative_path}")
+                    outfile.write("=" * 80 + "\n")
+                    outfile.write(f"ФАЙЛ: {full_path}\n")
+                    outfile.write(f"СТАТУС: Пропущен (бинарный файл)\n")
+                    outfile.write("=" * 80 + "\n\n\n")
+                    
+                except Exception as e:
+                    print(f"Ошибка при чтении {relative_path}: {e}")
+                    outfile.write("=" * 80 + "\n")
+                    outfile.write(f"ФАЙЛ: {full_path}\n")
+                    outfile.write(f"СТАТУС: Ошибка - {e}\n")
+                    outfile.write("=" * 80 + "\n\n\n")
+    
+    print("\n" + "=" * 50)
+    print(f"ГОТОВО!")
+    print(f"Обработано файлов: {file_count}")
+    print(f"Результат сохранен в: {os.path.abspath(output_file)}")
+    print("=" * 50)
+
+def main():
+    # Простой пример использования с консольным вводом
+    print("Добро пожаловать в сборщик кода проекта!")
+    print("=" * 50)
+    
+    # Настройки по умолчанию
+    output_file = input("Имя выходного файла (Enter для 'project_code_dump.txt'): ").strip()
+    if not output_file:
+        output_file = "project_code_dump.txt"
+    
+    print("\nЗапуск сборки кода из текущей директории...")
+    print(f"Выходной файл: {output_file}")
+    print("Обработка...\n")
+    
+    # Запуск сборки
+    collect_project_code(output_file=output_file)
+
+if __name__ == "__main__":
+    main()
+
+================================================================================
+КОНЕЦ ФАЙЛА: collect_cod.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/docker-compose.yml
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: docker-compose.yml
+================================================================================
+services:
+
+  postgres:
+    image: postgres:16
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - backend
+
+  pgadmin:
+    image: dpage/pgadmin4
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+
+    ports:
+      - "5050:80"
+
+    depends_on:
+      - postgres
+      
+
+    networks:
+      - backend
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+
+    volumes:
+      - redis_data:/data
+
+    ports:
+      - "6379:6379"
+
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
+
+
+networks:
+  backend:
+
+================================================================================
+КОНЕЦ ФАЙЛА: docker-compose.yml
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/main.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: main.py
+================================================================================
+import asyncio
+import logging
+
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.fsm.storage.redis import RedisStorage
+from aiogram.enums import ParseMode
+from infastructure.redis_inf import redis
+from conf.config import Conf_Bot
+from keyboards.meny import set_main_menu
+from handlers.game import router as game_router
+from DataBase.db import init_pool, close_pool
+from DataBase.create_tables import create_tables
+
+logger = logging.getLogger(__name__)
+
+config = Conf_Bot()
+
+async def main():
+    
+    # настройка логирования
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(filename)s - %(levelname)s : %(message)s' 
+    )
+    logger.info("Starting bot...")
+
+    # подключение к Redis и настройка хранилища для FSM
+    storage = RedisStorage(redis=redis)
+
+
+    bot = Bot(
+        token=config.bot_token,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+    )
+
+    dp = Dispatcher(storage=storage)
+
+    # регистрируем роутеры
+    dp.include_router(game_router)
+
+    # настраиваем кнопки меню
+    await set_main_menu(bot)
+
+    await bot.delete_webhook(drop_pending_updates=True)
+
+    try:
+        await init_pool()
+        await create_tables()
+        await dp.start_polling(bot)
+    finally:
+        await close_pool()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+================================================================================
+КОНЕЦ ФАЙЛА: main.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/DataBase/db.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: DataBase/db.py
+================================================================================
+from conf.config import Config_DB
+import asyncpg
+
+conf_db = Config_DB()
+_pool: asyncpg.Pool | None = None
+
+async def init_pool():
+    '''Создаем пуул соединений при старте приложения'''
+    global _pool
+
+    _pool = await asyncpg.create_pool(
+        host = conf_db.DB_HOST,
+        port = conf_db.DB_PORT,
+        database = conf_db.DB_NAME,
+        user = conf_db.DB_USER,
+        password = conf_db.DB_PASSWORD,
+        min_size = 2,
+        max_size = 10
+    )
+
+async def close_pool():
+    '''Закрываем пул соединений при завершении приложения'''
+    global _pool
+
+    if _pool:
+        await _pool.close()
+
+def get_pool() -> asyncpg.Pool:
+    '''Возвращаем пул соединений для использования в других частях приложения'''
+    if _pool is None:
+        raise RuntimeError("Пул соединений не инициализирован. Вызовите init_pool() перед использованием.")
+    return _pool
+
+
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: DataBase/db.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/DataBase/__init__.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: DataBase/__init__.py
+================================================================================
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: DataBase/__init__.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/DataBase/create_tables.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: DataBase/create_tables.py
+================================================================================
+import logging
+from DataBase.db import get_pool
+
+logger = logging.getLogger(__name__)
+
+async def create_tables():
+    pool = get_pool()
+    
+    query = '''
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        telegram_id BIGINT UNIQUE NOT NULL,
+        username VARCHAR(255),
+        games_played INT DEFAULT 0,
+        games_won INT DEFAULT 0,
+        games_lost INT DEFAULT 0
+    );
+    '''
+
+    async with pool.acquire() as connection:
+        await connection.execute(query)
+    logger.info("Таблица users успешно создана или уже существует.")
+
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: DataBase/create_tables.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/DataBase/queries.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: DataBase/queries.py
+================================================================================
+from DataBase.db import get_pool
+
+async def create_user(telegram_id: int, username: str):
+    pool = get_pool()
+    
+    query = '''
+    INSERT INTO users (telegram_id, username)
+    VALUES ($1, $2)
+    ;
+    '''
+
+    async with pool.acquire() as connection:
+        await connection.execute(query, telegram_id, username)
+
+
+async def update_user_stats(telegram_id: int, won: bool):
+    pool = get_pool()
+
+    if won:
+        query = '''
+        UPDATE users
+        SET games_played = games_played + 1, games_won = games_won + 1
+        WHERE telegram_id = $1;
+        '''
+    else:
+        query = '''
+        UPDATE users
+        SET games_played = games_played + 1, games_lost = games_lost + 1
+        WHERE telegram_id = $1;
+        '''
+
+    async with pool.acquire() as connection:
+        await connection.execute(query, telegram_id)
+
+async def get_user_stats(telegram_id: int):
+    pool = get_pool()
+
+    query = '''
+    SELECT games_played, games_won, games_lost
+    FROM users
+    WHERE telegram_id = $1;
+    '''
+
+    async with pool.acquire() as connection:
+        row = await connection.fetchrow(query, telegram_id)
+        return dict(row) if row else None
+    
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: DataBase/queries.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/infastructure/redis_inf.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: infastructure/redis_inf.py
+================================================================================
+from redis.asyncio import Redis
+
+redis = Redis(host="localhost", port=6379, decode_responses=True)
+
+================================================================================
+КОНЕЦ ФАЙЛА: infastructure/redis_inf.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/infastructure/__init__.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: infastructure/__init__.py
+================================================================================
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: infastructure/__init__.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/keyboards/meny.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: keyboards/meny.py
+================================================================================
+from aiogram import Bot
+from aiogram.types import BotCommand
+
+async def set_main_menu(bot:Bot):
+    main_menu_commands = [
+        BotCommand(command="/start", description="Запустить бота"),
+        BotCommand(command="/help", description="Помощь"),
+        BotCommand(command="/cancel", description="Отменить действие"),
+        BotCommand(command="/play", description="Начать игру")
+    ]
+    await bot.set_my_commands(main_menu_commands)
+
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: keyboards/meny.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/keyboards/__init__.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: keyboards/__init__.py
+================================================================================
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: keyboards/__init__.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/conf/config.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: conf/config.py
+================================================================================
+from dataclasses import dataclass
+from environs import Env
+import random
+
+env = Env()
+env.read_env()
+
+
+class Conf_Bot: 
+    def __init__(self):
+        self.bot_token = env.str("BOT_TOKEN")
+
+class Conf_Game:
+    def __init__(self):
+        self.game_attempt = 5
+
+    def attemp_number(self):
+        return random.randint(1, 100)
+    
+
+@dataclass
+class Config_DB:
+    '''Класс для хранения конфигурации базы данных'''
+    DB_HOST: str = env.str("DB_HOST")
+    DB_PORT: int = env.int("DB_PORT")
+    DB_USER: str = env.str("POSTGRES_USER")
+    DB_PASSWORD: str = env.str("POSTGRES_PASSWORD")
+    DB_NAME: str = env.str("POSTGRES_DB")
+
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: conf/config.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/conf/__init__.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: conf/__init__.py
+================================================================================
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: conf/__init__.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/handlers/game.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: handlers/game.py
+================================================================================
+from aiogram import Router
+from aiogram.types import Message
+from aiogram.filters import Command, CommandStart, StateFilter
+from aiogram.fsm.state import State, StatesGroup, default_state
+from aiogram.fsm.context import FSMContext
+from infastructure.redis_inf import redis
+from conf.config import Conf_Game
+import logging
+from DataBase.queries import create_user, update_user_stats, get_user_stats
+
+router = Router()
+config_game = Conf_Game()
+logger = logging.getLogger(__name__)
+
+
+class FSMGame(StatesGroup):
+    in_game = State()
+
+
+@router.message(Command("start"), StateFilter(default_state))
+async def start_message(message: Message):
+    t_id = message.from_user.id # получаем Telegram ID пользователя
+    username = message.from_user.username or "Unknown" # получаем имя пользователя или устанавливаем "Unknown", если имя отсутствует
+
+    user = await get_user_stats(t_id)
+    if user is None:
+        await create_user(t_id, username)
+        logger.info(f"Создан новый пользователь с Telegram ID: {t_id} и username: {username}.")
+    else:
+        logger.info(f"Пользователь с Telegram ID: {t_id} уже существует в базе данных.")
+
+    await message.answer(f"<b>Привет, {username}!</b> Я бот для игры в угадай число 🎰. \n" 
+                        "Напиши /play, чтобы начать игру."
+                        )
+
+
+@router.message(Command("cancel"), ~StateFilter(default_state))
+async def cancel_message(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Вы вышли из игры. Напишите /play, чтобы начать заново.")
+
+
+@router.message(Command("cancel"), StateFilter(default_state))
+async def cancel_message_not_in_game(message: Message):
+    await message.answer("Вы не в игре. Напишите /play, чтобы начать игру.")
+
+
+@router.message(Command("play"), StateFilter(default_state))
+async def play_message(message: Message, state: FSMContext):
+    '''Начинаем игру, устанавливаем состояние FSM и сохраняем данные в Redis'''
+    t_id = message.from_user.id
+
+    await state.set_state(FSMGame.in_game)
+    logger.info(f"Пользователь {t_id} вошел в игру.")
+
+    await redis.hset(f"user:{t_id}", mapping={
+        "attempts": config_game.game_attempt,
+        "number": config_game.attemp_number()
+    }
+    )
+    await redis.expire(f"user:{t_id}", 3600) # устанавливаем время жизни данных в Redis (например, 1 час)
+
+    await message.answer(f"Вы начали игру ! 🎮\n"
+                         f"Угадайте число от 1 до 100. У вас есть {config_game.game_attempt} попыток. \n"
+                         f"Напишите /cancel, чтобы выйти из игры.")
+
+
+
+@router.message(StateFilter(FSMGame.in_game), lambda message: message.text and message.text.isdigit())
+async def game_message(message: Message, state: FSMContext):
+    '''Обрабатываем попытку пользователя, сравниваем с загаданным числом и 
+    обновляем количество оставшихся попыток в Redis, сохраняем статистику в БД'''
+    t_id = message.from_user.id
+    user_data = await redis.hgetall(f"user:{t_id}")
+    if not user_data:
+        await message.answer(f"Извините, Ваше время игры вышло," 
+                             f"нажмите /play для начала новой игры")
+        await state.clear()
+        await redis.delete(f"user:{t_id}")
+        return
+    
+    attempts = int(user_data['attempts'])
+    secret_number = int(user_data['number'])
+    quess = int(message.text)
+    logger.info(f"Пользователь {t_id} сделал попытку: {message.text}. Осталось попыток: {attempts}. Загаданное число: {secret_number}.")
+    
+    if quess == secret_number:
+        await message.answer(f"Поздравляем! Вы угадали число! 🎉"
+                             f"Напишите /play, чтобы начать новую игру.")
+        await state.clear()
+        await redis.delete(f"user:{t_id}")
+        await update_user_stats(t_id, won=True)
+        return
+
+    elif quess > secret_number:
+        await message.answer(f"Загаданное число меньше. Попробуйте снова.")
+        logger.info(f"Пользователь {t_id} ввел число {message.text}, которое больше загаданного.")
+        await redis.hset(f"user:{t_id}", mapping={"attempts": attempts - 1})
+        attempts -= 1
+
+
+    elif quess < secret_number:
+        await message.answer(f"Загаданное число больше. Попробуйте снова.")
+        logger.info(f"Пользователь {t_id} ввел число {message.text}, которое меньше загаданного.")
+        await redis.hset(f"user:{t_id}", mapping={"attempts": attempts - 1})
+        attempts -= 1
+
+
+    if attempts <= 0:
+        await message.answer(f"К сожалению, у вас закончились попытки. 😞 \n"
+                             f"Загаданное число было: <u>{int(user_data['number'])}</u>.\n"
+                             f"Напишите /play, чтобы начать новую игру.")
+        await state.clear()
+        await redis.delete(f"user:{t_id}")
+        await update_user_stats(t_id, won=False)
+        return 
+    
+@router.message(StateFilter(FSMGame.in_game))
+async def game_message_not_digit(message: Message):
+    await message.answer(f"Пожалуйста, введите число от 1 до 100.")
+
+    
+    
+
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: handlers/game.py
+================================================================================
+
+
+================================================================================
+ФАЙЛ: /Users/ilasavin/VSCProjects/Bot_QN/handlers/__init__.py
+ОТНОСИТЕЛЬНЫЙ ПУТЬ: handlers/__init__.py
+================================================================================
+
+
+================================================================================
+КОНЕЦ ФАЙЛА: handlers/__init__.py
+================================================================================
+
+
